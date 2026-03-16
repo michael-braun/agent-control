@@ -2,7 +2,7 @@ import { homedir } from 'os';
 import { join } from 'path';
 
 export const HOME = homedir();
-export const BASE_DIR = join(HOME, '.agent-manager');
+export const BASE_DIR = join(HOME, '.agent-control');
 export const CONFIG_PATH = join(BASE_DIR, 'config.json');
 export const REPOS_DIR = join(BASE_DIR, 'repos');
 export const AGENTS_DIR = join(BASE_DIR, 'agents');

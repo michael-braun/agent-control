@@ -14,7 +14,7 @@ export function checkOrphanedSymlinks(): DiagnosticResult {
   }
   
   const entries = readdirSync(KIRO_AGENTS_DIR);
-  const agentManagerSymlinks = entries.filter(e => e.startsWith('agent-manager_'));
+  const agentManagerSymlinks = entries.filter(e => e.startsWith('agent-control_'));
   
   for (const symlink of agentManagerSymlinks) {
     const symlinkPath = join(KIRO_AGENTS_DIR, symlink);

@@ -18,7 +18,7 @@ import {
 const program = new Command();
 
 program
-  .name('agent-manager')
+  .name('agent-control')
   .description('CLI tool to manage agent repositories')
   .version('1.0.0')
   .action(interactive);

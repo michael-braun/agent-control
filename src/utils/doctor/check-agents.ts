@@ -19,8 +19,8 @@ export function checkAgents(config: Config): AgentCheckResult {
   
   for (const agent of config.agents) {
     const agentDir = join(AGENTS_DIR, agent.id);
-    const agentSymlink = join(KIRO_AGENTS_DIR, `agent-manager_${agent.id}.json`);
-    const filesSymlink = join(KIRO_AGENTS_DIR, `agent-manager_${agent.id}`);
+    const agentSymlink = join(KIRO_AGENTS_DIR, `agent-control_${agent.id}.json`);
+    const filesSymlink = join(KIRO_AGENTS_DIR, `agent-control_${agent.id}`);
     
     let agentValid = true;
     

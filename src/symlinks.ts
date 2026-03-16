@@ -34,7 +34,7 @@ export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: s
     }
     
     copyFileSync(file, targetPath);
-    fileMapping[file] = `./agent-manager_${agent.id}/${relativePath}`;
+    fileMapping[file] = `./agent-control_${agent.id}/${relativePath}`;
   }
   
   // Read and modify JSON
@@ -72,8 +72,8 @@ export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: s
   writeFileSync(jsonTargetPath, JSON.stringify(jsonData, null, 2));
   
   // Create symlinks in .kiro/agents
-  const jsonSymlink = join(KIRO_AGENTS_DIR, `agent-manager_${agent.id}.json`);
-  const filesSymlink = join(KIRO_AGENTS_DIR, `agent-manager_${agent.id}`);
+  const jsonSymlink = join(KIRO_AGENTS_DIR, `agent-control_${agent.id}.json`);
+  const filesSymlink = join(KIRO_AGENTS_DIR, `agent-control_${agent.id}`);
   
   createSymlink(jsonTargetPath, jsonSymlink);
   createSymlink(filesDir, filesSymlink);
