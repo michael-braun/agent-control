@@ -1,8 +1,31 @@
-# agent-manager
+# agent-control-cli
 
-CLI tool to manage agent repositories.
+CLI to manage agent repositories and install/uninstall agents for Kiro.
+
+## Quick Start
+
+```bash
+npm install -g @agent-control/cli
+agent-control
+```
+
+You can also use the short command alias:
+
+```bash
+agentctl
+```
+
+Running the command without arguments opens interactive mode.
 
 ## Installation
+
+### From npm (recommended)
+
+```bash
+npm install -g @agent-control/cli
+```
+
+### From source (local checkout)
 
 ```bash
 npm install
@@ -10,85 +33,76 @@ npm run build
 npm install -g .
 ```
 
-## Development
+## Core Concepts
+
+- A **repository** is a Git URL or local path that contains agents.
+- An **agent id** identifies one concrete agent inside a repository.
+- Installed agents are linked into Kiro's agent directory.
+
+## Common Workflows
+
+### 1) Add a repository and install an agent
 
 ```bash
-npm run dev  # Watch mode
+agent-control add-repo <url-or-local-path> <repo-name>
+agent-control list-available <repo-name>
+agent-control install <repo-name> <agent-id>
 ```
 
-## Usage
+### 2) Check what is installed
 
-### Interactive Mode
-
-Simply run without arguments to start interactive mode:
 ```bash
-agent-manager
+agent-control list
+agent-control info <repo-name> <agent-id>
 ```
 
-This provides a menu with options to:
-- Update repositories
-- Browse available agents (with install option)
-- List installed agents
-- Cleanup symlinks
-- Add repository
-- Exit
-
-### Direct Commands
+### 3) Update and repair setup
 
 ```bash
-# Repository Management
-agent-manager add-repo <url> <name>      # Add a repository
-agent-manager remove-repo <name>         # Remove a repository
-agent-manager list-repos                 # List all repositories
+agent-control update
+agent-control doctor
+agent-control cleanup
+```
 
-# Agent Management
-agent-manager list                       # List installed agents
-agent-manager list-available <repo>      # List available agents
-agent-manager info <repo> <agent-id>     # Show agent information
-agent-manager install <repo> <agent-id>  # Install an agent
-agent-manager uninstall <repo> <agent-id> # Uninstall an agent
+## Command Reference
+
+```bash
+# Interactive mode
+agent-control
+agent-control interactive
+
+# Repository management
+agent-control add-repo <url-or-local-path> <name>
+agent-control remove-repo <name>
+agent-control list-repos
+
+# Agent management
+agent-control list
+agent-control list-available <repo>
+agent-control info <repo> <agent-id>
+agent-control install <repo> <agent-id>
+agent-control uninstall <repo> <agent-id>
 
 # Maintenance
-agent-manager cleanup                    # Cleanup and recreate symlinks
-agent-manager update                     # Update all repositories
-agent-manager doctor                     # Diagnose and fix issues
+agent-control update
+agent-control cleanup
+agent-control doctor
 ```
 
-## Project Structure
+## Where Data Is Stored
 
-```
-src/
-├── cli.ts              # CLI entry point
-├── commands/           # Command implementations
-│   ├── add-repo.ts
-│   ├── install.ts
-│   ├── uninstall.ts
-│   ├── list.ts
-│   ├── list-available.ts
-│   ├── info.ts
-│   ├── cleanup.ts
-│   ├── update.ts
-│   ├── interactive.ts
-│   └── index.ts
-├── utils/              # Utility functions
-│   ├── config.ts       # Config management
-│   ├── filesystem.ts   # File operations
-│   ├── markdown.ts     # Markdown parsing
-│   ├── paths.ts        # Path utilities
-│   ├── hash.ts         # Hashing utilities
-│   ├── git.ts          # Git operations
-│   ├── interactive.ts  # Interactive prompts
-│   └── index.ts
-├── analyzer.ts         # Repository and agent analysis
-├── symlinks.ts         # Symlink management
-├── format.ts           # Output formatting
-├── constants.ts        # Configuration constants
-└── types.ts            # TypeScript types
-```
+- Config: `~/.agent-control/config.json`
+- Cloned repositories: `~/.agent-control/repos/`
+- Installed agent files: `~/.agent-control/agents/`
+- Kiro symlinks: `~/.kiro/agents/`
 
-## Configuration
+## Troubleshooting
 
-Configuration is stored in `~/.agent-manager/config.json`.
-Repositories are cloned to `~/.agent-manager/repos/`.
-Agent files are copied to `~/.agent-manager/agents/`.
-Symlinks are created in `~/.kiro/agents/`.
+- Run `agent-control doctor` to detect and auto-fix common setup issues.
+- Run `agent-control cleanup` if symlinks look broken.
+- Verify repositories with `agent-control list-repos`.
+
+## Notes
+
+- Command names: `agent-control` and `agentctl` are equivalent.
+- If you prefer menus over flags/arguments, use interactive mode.
