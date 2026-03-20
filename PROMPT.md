@@ -8,7 +8,11 @@ Es gibt zum Command add-repo auch eine interaktive Variante, in der der Benutzer
 
 Beim Hinzufügen eines repos analysiert das CLI-Tool einmal alle .json-Dateien (auch rekursiv), die einen name, eine description und einen prompt haben. Wenn die .json-Datei ein Feld id beinhaltet, wird der Pfad zu der JSON-Datei als identifier benutzt. Dieser identifier (Pfad oder id-Feld) wird zusammen mit dem repository Namen gehasht und als ID genutzt wird. Speichere die letzte Analyse/Update-Zeit des Repositories in den Meta-Informationen ab.
 
-Wenn prompt eine file:// URL zu einer md-Datei ist schaut sich das CLI-Tool auch diese Datei an und sucht nach referenzierten/verlinkten Dateien in der Markdown-Datei (rekursiv, aber so, dass eine Datei nicht doppelt analysiert wird bei einer zirkularen Abhängigkeit). Die so gefunden Erkenntnisse (einschließlich name und description) speichert das Tool für das Repository in der Datei .agent-control/repos/<name>.meta.json unter dem Property agents. Die gleiche Analyse wie beim prompt-Feld soll auch für alle angegebenen Pfade im resources-Feld (Array) in der json-Datei durchgeführt werden. Allerdings müssen hier die Dateien mit absoluten Pfaden referenziert werden.
+Wenn prompt eine file:// URL zu einer md-Datei ist schaut sich das CLI-Tool auch diese Datei an und sucht nach referenzierten/verlinkten Dateien in der Markdown-Datei (rekursiv, aber so, dass eine Datei nicht doppelt analysiert wird bei einer zirkularen Abhängigkeit).
+Die so gefunden Erkenntnisse (einschließlich name und description) speichert das Tool für das Repository in der Datei .agent-control/repos/<name>.meta.json unter dem Property agents.
+Die gleiche Analyse wie beim prompt-Feld soll auch für alle angegebenen Pfade im resources-Feld (Array) in der json-Datei durchgeführt werden. 
+Im resources-Feld kann auch eine URL mit dem Protokoll skill:// stehen. Verändere diese auch entsprechend.
+Allerdings müssen hier die Dateien mit absoluten Pfaden referenziert werden.
 
 Es gibt ein Command und ein Tool list-repo mit dem man die Repositories anzeigen lassen kann. Im interaktiven Modus ist es möglich über das Tool auch das add-repo Tool zu öffnen. beim Tool (interkativ) ist es möglich ein Repository auszuwählen um weitere Informationen (Name, Total agents, Installed agents, Git-Support, Letztes Update) zu erhalten und das repository löschen oder aktualisieren zu können. Hebe den aktiven/deaktivierten Git-Support grün oder orange hervor. Interaktive Listen mit Aktionen haben standardmäßig Back ausgewählt.
 

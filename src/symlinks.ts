@@ -9,7 +9,7 @@ function resolveJsonReference(jsonDir: string, reference: string): string {
 }
 
 function resolveFileUrlReference(jsonDir: string, fileUrl: string): string {
-  const fileRef = decodeURIComponent(fileUrl.replace('file://', ''));
+  const fileRef = decodeURIComponent(fileUrl.replace(/^(?:file|skill):\/\//, ''));
   return resolveJsonReference(jsonDir, fileRef);
 }
 
@@ -66,10 +66,11 @@ export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: s
   // Update resources paths
   if (Array.isArray(jsonData.resources)) {
     jsonData.resources = jsonData.resources.map(resource => {
-      if (resource.startsWith('file://')) {
+      if (resource.startsWith('file://') || resource.startsWith('skill://')) {
+        const protocol = resource.startsWith('skill://') ? 'skill://' : 'file://';
         const originalPath = resolveFileUrlReference(jsonDir, resource);
         if (absoluteTargetMapping[originalPath]) {
-          return `file://${absoluteTargetMapping[originalPath]}`;
+          return `${protocol}${absoluteTargetMapping[originalPath]}`;
         }
         return resource;
       }

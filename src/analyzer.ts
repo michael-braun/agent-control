@@ -26,8 +26,8 @@ export function analyzeAgentJson(jsonPath: string, repoDir: string, repoName: st
   if (Array.isArray(data.resources)) {
     for (const resource of data.resources) {
       let resourcePath: string;
-      if (resource.startsWith('file://')) {
-        const relativePath = resource.replace('file://', '').replace(/^\.\//, '');
+      if (resource.startsWith('file://') || resource.startsWith('skill://')) {
+        const relativePath = resource.replace(/^(?:file|skill):\/\//, '').replace(/^\.\//, '');
         resourcePath = join(jsonDir, relativePath);
       } else {
         resourcePath = join(repoDir, resource);
