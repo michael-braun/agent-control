@@ -21,7 +21,7 @@ export async function installAgent(repo: string, agentId: string): Promise<void>
   }
   
   try {
-    const { symlinks } = installAgentFiles(agent, repo);
+    const { symlinks, installedSkillIds } = installAgentFiles(agent, repo);
     
     config.agents.push({ id: agent.id, repo, name: agent.name });
     writeConfig(config);

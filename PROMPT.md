@@ -161,6 +161,17 @@ Wird ausgeführt bei: `add-repo`, `update`.
 - URLs mit Protokoll `skill://` werden entsprechend verarbeitet.
 - Dateien müssen mit **absoluten Pfaden** referenziert werden.
 
+#### 3.1.3 `skill://`-Referenzen
+
+- Im Repo referenziert ein Agent Skills über `skill://<relativer-pfad-im-repo>` (z.B. `skill://skills/my-skill/SKILL.md`).
+- Der Pfad ist relativ zum Repo-Verzeichnis und entspricht dem **Verzeichnisnamen** des Skills.
+- Bei der Agent-Installation (→ Abschnitt 4) wird jede `skill://`-Referenz aufgelöst:
+  1. Skill-Verzeichnisname aus dem Pfad extrahieren.
+  2. Passenden Skill im selben Repo via Meta-Daten suchen.
+  3. Ist der Skill noch nicht installiert → wird er **automatisch mit-installiert**.
+  4. Ist der Skill im Repo nicht bekannt → **Fehler, Abbruch mit Rollback**.
+  5. Im kopierten Agent-JSON wird `skill://skills/my-skill/SKILL.md` ersetzt durch `skill://~/.kiro/skills/agent_control_<skill-hash>/SKILL.md`.
+
 ### 3.2 Skill-Analyse
 
 1. Im Repository wird das Verzeichnis `skills/` auf Top-Level durchsucht.

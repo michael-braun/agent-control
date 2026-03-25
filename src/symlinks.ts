@@ -1,8 +1,9 @@
-import { relative, dirname, join, isAbsolute, resolve } from 'path';
+import { relative, dirname, join, isAbsolute, resolve, basename } from 'path';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, rmSync, readdirSync, statSync } from 'fs';
 import type { Agent, AgentJson, Skill } from './types.js';
 import { readConfig, writeConfig, createSymlink, removeSymlink, getRepoPath, getAgentDir, getSkillDir } from './utils/index.js';
 import { KIRO_AGENTS_DIR, KIRO_SKILLS_DIR } from './constants.js';
+import { loadRepoMeta } from './analyzer.js';
 
 function resolveJsonReference(jsonDir: string, reference: string): string {
   return isAbsolute(reference) ? resolve(reference) : resolve(jsonDir, reference);
@@ -13,7 +14,41 @@ function resolveFileUrlReference(jsonDir: string, fileUrl: string): string {
   return resolveJsonReference(jsonDir, fileRef);
 }
 
-export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: string; filesDir: string; symlinks: string[] } {
+function resolveSkillReference(
+  resource: string,
+  repoName: string,
+  repoPath: string,
+  meta: import('./types.js').RepoMeta | null,
+  config: import('./types.js').Config,
+  installedSkillIds: string[]
+): string {
+  const skillRelPath = resource.replace('skill://', '');
+  // Extract skill directory name (e.g. "skills/my-skill/SKILL.md" → "my-skill")
+  const parts = skillRelPath.split('/');
+  const skillsIdx = parts.indexOf('skills');
+  const skillDirName = skillsIdx >= 0 && parts.length > skillsIdx + 1 ? parts[skillsIdx + 1] : parts[0];
+
+  // Find matching skill in repo meta
+  const skill = meta?.skills?.find(s => basename(s.dir) === skillDirName);
+  if (!skill) {
+    throw new Error(`Skill "${skillDirName}" not found in repository ${repoName}. Cannot resolve: ${resource}`);
+  }
+
+  // Auto-install skill if not already installed
+  if (!config.skills.some(s => s.id === skill.id && s.repo === repoName)) {
+    const { symlinks } = installSkillFiles(skill);
+    config.skills.push({ id: skill.id, repo: repoName, name: skill.name });
+    writeConfig(config);
+    registerSymlinks(skill.id, symlinks);
+    installedSkillIds.push(skill.id);
+    console.log(`  Auto-installed skill ${skill.name} (${skill.id}) from ${repoName}`);
+  }
+
+  // Replace with installed path
+  return `skill://~/.kiro/skills/agent-control_${skill.id}/SKILL.md`;
+}
+
+export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: string; filesDir: string; symlinks: string[]; installedSkillIds: string[] } {
   const repoPath = getRepoPath(repoName);
   const agentDir = getAgentDir(agent.id);
   const filesDir = join(agentDir, 'files');
@@ -63,14 +98,21 @@ export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: s
     }
   }
 
-  // Update resources paths
+  // Resolve skill:// references and update resources paths
+  const installedSkillIds: string[] = [];
   if (Array.isArray(jsonData.resources)) {
+    const meta = loadRepoMeta(repoName);
+    const config = readConfig();
+
     jsonData.resources = jsonData.resources.map(resource => {
-      if (resource.startsWith('file://') || resource.startsWith('skill://')) {
-        const protocol = resource.startsWith('skill://') ? 'skill://' : 'file://';
+      if (resource.startsWith('skill://')) {
+        return resolveSkillReference(resource, repoName, repoPath, meta, config, installedSkillIds);
+      }
+
+      if (resource.startsWith('file://')) {
         const originalPath = resolveFileUrlReference(jsonDir, resource);
         if (absoluteTargetMapping[originalPath]) {
-          return `${protocol}${absoluteTargetMapping[originalPath]}`;
+          return `file://${absoluteTargetMapping[originalPath]}`;
         }
         return resource;
       }
@@ -98,7 +140,8 @@ export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: s
   return {
     jsonPath: jsonTargetPath,
     filesDir,
-    symlinks: [jsonSymlink, filesSymlink]
+    symlinks: [jsonSymlink, filesSymlink],
+    installedSkillIds
   };
 }
 
@@ -189,6 +232,7 @@ export function installSkillFiles(skill: Skill): { symlinks: string[] } {
   copyDirRecursive(skill.dir, skillDir);
 
   const symlink = join(KIRO_SKILLS_DIR, `agent-control_${skill.id}`);
+  removeSymlink(symlink);
   createSymlink(skillDir, symlink);
 
   return { symlinks: [symlink] };
