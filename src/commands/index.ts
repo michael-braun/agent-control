@@ -10,3 +10,8 @@ export { cleanup } from './cleanup.js';
 export { update } from './update.js';
 export { doctor } from './doctor.js';
 export { interactive } from '../tools/interactive.js';
+export { installSkill } from './install-skill.js';
+export { uninstallSkill } from './uninstall-skill.js';
+export { listInstalledSkills } from './list-skills.js';
+export { listAvailableSkills } from './list-available-skills.js';
+export { showSkillInfo } from './skill-info.js';

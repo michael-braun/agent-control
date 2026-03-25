@@ -1,6 +1,7 @@
 import { addRepoTool } from './add-repo-tool.js';
 import { listReposTool } from './list-repos-tool.js';
 import { agentsTool } from './agents-tool.js';
+import { skillsTool } from './skills-tool.js';
 import { update } from '../commands/update.js';
 import { cleanup } from '../commands/cleanup.js';
 import { doctor } from '../commands/doctor.js';
@@ -17,6 +18,7 @@ export async function interactive(): Promise<void> {
         { name: '🔄  Update repositories', value: 'update' },
         { name: '📚  Manage repositories', value: 'list-repos' },
         { name: '🤖  Agents', value: 'agents' },
+        { name: '📝  Skills', value: 'skills' },
         { name: '🩺  Doctor (diagnose & fix)', value: 'doctor' },
         { name: '🧹  Cleanup symlinks', value: 'cleanup' },
         { name: '👋  Exit', value: 'exit' }
@@ -38,6 +40,9 @@ export async function interactive(): Promise<void> {
           break;
         case 'agents':
           await agentsTool();
+          break;
+        case 'skills':
+          await skillsTool();
           break;
         case 'doctor':
           await doctor();

@@ -31,7 +31,9 @@ describe('analyzer', () => {
     vi.doMock('fs', () => ({
       existsSync: vi.fn(() => true),
       readFileSync: vi.fn(() => JSON.stringify({ name: 'Agent', description: 'Desc', prompt: 'file://prompt.md' })),
-      writeFileSync
+      writeFileSync,
+      readdirSync: vi.fn(() => []),
+      statSync: vi.fn(() => ({ isDirectory: () => false }))
     }));
 
     vi.doMock('../src/utils/index.js', () => ({
@@ -47,7 +49,7 @@ describe('analyzer', () => {
     analyzeRepository('repo', '/repo');
 
     expect(writeFileSync).toHaveBeenCalledWith('/repo/meta.json', expect.stringContaining('agent-hash'));
-    expect(log).toHaveBeenCalledWith('Found 1 agents in repo');
+    expect(log).toHaveBeenCalledWith('Found 1 agents and 0 skills in repo');
   });
 });
 

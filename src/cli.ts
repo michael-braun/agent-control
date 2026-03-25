@@ -12,7 +12,12 @@ import {
   listRepos,
   removeRepo,
   showAgentInfo,
-  interactive
+  interactive,
+  installSkill,
+  uninstallSkill,
+  listInstalledSkills,
+  listAvailableSkills,
+  showSkillInfo
 } from './commands/index.js';
 
 const program = new Command();
@@ -62,6 +67,31 @@ program
   .command('uninstall <repo> <agent-id>')
   .description('Uninstall an agent')
   .action(uninstallAgent);
+
+program
+  .command('install-skill <repo> <skill-id>')
+  .description('Install a skill')
+  .action(installSkill);
+
+program
+  .command('uninstall-skill <repo> <skill-id>')
+  .description('Uninstall a skill')
+  .action(uninstallSkill);
+
+program
+  .command('list-skills')
+  .description('List all installed skills')
+  .action(listInstalledSkills);
+
+program
+  .command('list-available-skills <repo>')
+  .description('List all available skills in a repository')
+  .action(listAvailableSkills);
+
+program
+  .command('skill-info <repo> <skill-id>')
+  .description('Show detailed information about a skill')
+  .action(showSkillInfo);
 
 program
   .command('cleanup')

@@ -1,8 +1,8 @@
 import { relative, dirname, join, isAbsolute, resolve } from 'path';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, rmSync } from 'fs';
-import type { Agent, AgentJson } from './types.js';
-import { readConfig, writeConfig, createSymlink, removeSymlink, getRepoPath, getAgentDir } from './utils/index.js';
-import { KIRO_AGENTS_DIR } from './constants.js';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync, rmSync, readdirSync, statSync } from 'fs';
+import type { Agent, AgentJson, Skill } from './types.js';
+import { readConfig, writeConfig, createSymlink, removeSymlink, getRepoPath, getAgentDir, getSkillDir } from './utils/index.js';
+import { KIRO_AGENTS_DIR, KIRO_SKILLS_DIR } from './constants.js';
 
 function resolveJsonReference(jsonDir: string, reference: string): string {
   return isAbsolute(reference) ? resolve(reference) : resolve(jsonDir, reference);
@@ -163,6 +163,62 @@ export function uninstallAgentFiles(agentId: string): void {
   const agentDir = getAgentDir(agentId);
   if (existsSync(agentDir)) {
     rmSync(agentDir, { recursive: true, force: true });
+  }
+}
+
+function copyDirRecursive(src: string, dest: string): void {
+  mkdirSync(dest, { recursive: true });
+  for (const entry of readdirSync(src)) {
+    const srcPath = join(src, entry);
+    const destPath = join(dest, entry);
+    if (statSync(srcPath).isDirectory()) {
+      copyDirRecursive(srcPath, destPath);
+    } else {
+      copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+export function installSkillFiles(skill: Skill): { symlinks: string[] } {
+  const skillDir = getSkillDir(skill.id);
+
+  if (existsSync(skillDir)) {
+    rmSync(skillDir, { recursive: true, force: true });
+  }
+
+  copyDirRecursive(skill.dir, skillDir);
+
+  const symlink = join(KIRO_SKILLS_DIR, `agent-control_${skill.id}`);
+  createSymlink(skillDir, symlink);
+
+  return { symlinks: [symlink] };
+}
+
+export function uninstallSkillFiles(skillId: string): void {
+  const config = readConfig();
+  const linksToRemove: string[] = [];
+
+  for (const [link, ids] of Object.entries(config.symlinks)) {
+    if (ids.includes(skillId)) {
+      const remaining = ids.filter(id => id !== skillId);
+      if (remaining.length === 0) {
+        removeSymlink(link);
+        linksToRemove.push(link);
+      } else {
+        config.symlinks[link] = remaining;
+      }
+    }
+  }
+
+  for (const link of linksToRemove) {
+    delete config.symlinks[link];
+  }
+
+  writeConfig(config);
+
+  const skillDir = getSkillDir(skillId);
+  if (existsSync(skillDir)) {
+    rmSync(skillDir, { recursive: true, force: true });
   }
 }
 

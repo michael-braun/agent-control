@@ -38,10 +38,10 @@ export function checkConfig(): { issues: number; fixes: Array<() => void>; confi
     console.log('  ⚠️  Config file is corrupted or invalid');
     issues++;
     fixes.push(() => {
-      writeConfig({ agents: [], symlinks: {} });
+      writeConfig({ agents: [], skills: [], symlinks: {} });
       console.log('  ✓ Recreated config file');
     });
-    config = { agents: [], symlinks: {} };
+    config = { agents: [], skills: [], symlinks: {} };
   }
   
   return { issues, fixes, config };

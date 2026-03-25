@@ -26,7 +26,7 @@ describe('config utils', () => {
     vi.mocked(readFileSync).mockReturnValue('{"agents":[],"symlinks":{}}' as any);
 
     const config = readConfig();
-    expect(config).toEqual({ agents: [], symlinks: {} });
+    expect(config).toEqual({ agents: [], skills: [], symlinks: {} });
   });
 
   it('writeConfig serializes config', () => {

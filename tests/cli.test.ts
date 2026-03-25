@@ -37,7 +37,12 @@ describe('cli bootstrap', () => {
       listRepos: vi.fn(),
       removeRepo: vi.fn(),
       showAgentInfo: vi.fn(),
-      interactive: vi.fn()
+      interactive: vi.fn(),
+      installSkill: vi.fn(),
+      uninstallSkill: vi.fn(),
+      listInstalledSkills: vi.fn(),
+      listAvailableSkills: vi.fn(),
+      showSkillInfo: vi.fn()
     }));
 
     await import('../src/cli.js');

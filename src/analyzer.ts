@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, basename } from 'path';
-import type { Agent, AgentJson, RepoMeta } from './types.js';
+import type { Agent, AgentJson, Skill, RepoMeta } from './types.js';
 import { hashPath, findJsonFiles, extractMarkdownLinks, getRepoMetaPath } from './utils/index.js';
 
 export function analyzeAgentJson(jsonPath: string, repoDir: string, repoName: string): Agent | null {
@@ -60,14 +60,69 @@ export function analyzeRepository(repoName: string, repoPath: string): void {
     .map(f => analyzeAgentJson(f, repoPath, repoName))
     .filter((a): a is Agent => a !== null);
   
+  const skills = analyzeSkills(repoName, repoPath);
+
   const metaPath = getRepoMetaPath(repoName);
   const meta: RepoMeta = {
     agents,
+    skills,
     lastUpdated: new Date().toISOString()
   };
   writeFileSync(metaPath, JSON.stringify(meta, null, 2));
   
-  console.log(`Found ${agents.length} agents in ${repoName}`);
+  console.log(`Found ${agents.length} agents and ${skills.length} skills in ${repoName}`);
+}
+
+function collectFiles(dir: string): string[] {
+  const results: string[] = [];
+  for (const item of readdirSync(dir)) {
+    const fullPath = join(dir, item);
+    if (statSync(fullPath).isDirectory()) {
+      results.push(...collectFiles(fullPath));
+    } else {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+function parseSkillFrontmatter(content: string): { name?: string; description?: string } {
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const result: Record<string, string> = {};
+  for (const line of match[1].split('\n')) {
+    const m = line.match(/^(\w+):\s*(.+)/);
+    if (m) result[m[1]] = m[2].trim();
+  }
+  return result;
+}
+
+export function analyzeSkills(repoName: string, repoPath: string): Skill[] {
+  const skillsDir = join(repoPath, 'skills');
+  if (!existsSync(skillsDir)) return [];
+
+  const skills: Skill[] = [];
+
+  for (const entry of readdirSync(skillsDir)) {
+    const entryPath = join(skillsDir, entry);
+    if (!statSync(entryPath).isDirectory()) continue;
+
+    const skillMd = join(entryPath, 'SKILL.md');
+    if (!existsSync(skillMd)) continue;
+
+    const frontmatter = parseSkillFrontmatter(readFileSync(skillMd, 'utf8'));
+    if (!frontmatter.name || !frontmatter.description) continue;
+
+    skills.push({
+      id: hashPath(`${repoName}:${frontmatter.name}`),
+      name: frontmatter.name,
+      description: frontmatter.description,
+      dir: entryPath,
+      files: collectFiles(entryPath),
+    });
+  }
+
+  return skills;
 }
 
 export function loadRepoMeta(repoName: string): RepoMeta | null {

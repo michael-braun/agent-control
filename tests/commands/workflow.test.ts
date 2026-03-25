@@ -32,14 +32,16 @@ describe('commands workflow', () => {
     vi.doMock('../../src/utils/index.js', () => ({
       readConfig: vi.fn(() => ({
         agents: [{ id: 'a1', repo: 'repo', name: 'A' }],
+        skills: [],
         symlinks: {}
       }))
     }));
     vi.doMock('../../src/analyzer.js', () => ({
-      loadRepoMeta: vi.fn(() => ({ agents: [{ id: 'a1', name: 'A', description: 'D', files: [] }] }))
+      loadRepoMeta: vi.fn(() => ({ agents: [{ id: 'a1', name: 'A', description: 'D', files: [] }], skills: [] }))
     }));
     vi.doMock('../../src/symlinks.js', () => ({
       installAgentFiles,
+      installSkillFiles: vi.fn(() => ({ symlinks: [] })),
       registerSymlinks,
       removeAllSymlinks: vi.fn()
     }));

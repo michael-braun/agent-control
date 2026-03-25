@@ -21,7 +21,9 @@
 - Konfigurationsdatei: `~/.agent-control/config.json`
 - Geklonte Repositories: `~/.agent-control/repos/`
 - Installierte Agenten: `~/.agent-control/agents/`
-- Kiro-Symlinks: `~/.kiro/agents/`
+- Installierte Skills: `~/.agent-control/skills/`
+- Kiro-Agent-Symlinks: `~/.kiro/agents/`
+- Kiro-Skill-Symlinks: `~/.kiro/skills/`
 
 ### 1.3 Begriffe
 
@@ -85,7 +87,32 @@
 - Zeigt detaillierte Informationen zu einem Agenten: Name, Description, Repository, bekannte Dateien.
 - Zeigt den aktuellen Status (installiert / nicht installiert).
 
-### 2.3 Wartung
+### 2.3 Skills-Management
+
+#### `install-skill <repo> <skill-id>`
+
+- Aktiviert einen Skill. Details zum Installationsprozess → Abschnitt 4.1.
+- Fehler, wenn der Skill bereits installiert ist.
+
+#### `uninstall-skill <repo> <skill-id>`
+
+- Deaktiviert einen Skill.
+- Passt `config.json` an und entfernt alle zugehörigen Symlinks.
+
+#### `list-skills`
+
+- Listet alle aktuell installierten/aktiven Skills auf.
+
+#### `list-available-skills <repo>`
+
+- Listet alle bekannten und analysierten Skills aus dem angegebenen Repository auf.
+
+#### `skill-info <repo> <skill-id>`
+
+- Zeigt detaillierte Informationen zu einem Skill: Name, Description, Repository, Dateien.
+- Zeigt den aktuellen Status (installiert / nicht installiert).
+
+### 2.4 Wartung
 
 #### `update`
 
@@ -114,23 +141,34 @@
 
 Wird ausgeführt bei: `add-repo`, `update`.
 
+### 3.1 Agent-Analyse
+
 1. Alle `.json`-Dateien (rekursiv) im Repository durchsuchen, die `name`, `description` und `prompt` enthalten.
 2. Wenn die JSON-Datei ein Feld `id` hat, wird dieses als Identifier genutzt; sonst der Pfad zur JSON-Datei.
 3. Der Identifier wird zusammen mit dem Repository-Namen **gehasht** → ergibt die Agent-ID.
 4. Ergebnisse werden in `~/.agent-control/repos/<name>.meta.json` unter dem Property `agents` gespeichert.
 5. Letzte Analyse-/Update-Zeit des Repositories wird in den Meta-Informationen gespeichert.
 
-### 3.1 Prompt-Analyse
+#### 3.1.1 Prompt-Analyse
 
 - Wenn `prompt` eine `file://`-URL zu einer `.md`-Datei ist:
   - Die Datei wird analysiert und nach referenzierten/verlinkten Dateien durchsucht (rekursiv).
   - Zirkuläre Abhängigkeiten werden erkannt (keine Datei doppelt analysieren).
 
-### 3.2 Resources-Analyse
+#### 3.1.2 Resources-Analyse
 
 - Gleiche Analyse wie beim `prompt`-Feld für alle Pfade im `resources`-Array.
 - URLs mit Protokoll `skill://` werden entsprechend verarbeitet.
 - Dateien müssen mit **absoluten Pfaden** referenziert werden.
+
+### 3.2 Skill-Analyse
+
+1. Im Repository wird das Verzeichnis `skills/` auf Top-Level durchsucht.
+2. Jedes Unterverzeichnis, das eine `SKILL.md`-Datei enthält, wird als Skill erkannt.
+3. Aus der `SKILL.md` werden `name` und `description` aus dem YAML-Frontmatter extrahiert.
+4. Skill-ID = Hash aus `repoName:skillName`.
+5. Alle Dateien im Skill-Verzeichnis (inkl. `references/`) werden als bekannte Dateien erfasst.
+6. Ergebnisse werden in `~/.agent-control/repos/<name>.meta.json` unter dem Property `skills` gespeichert.
 
 ---
 
@@ -149,6 +187,14 @@ Wird ausgeführt bei: `add-repo`, `update`.
 5. Alle Symlinks werden in `config.json` unter `symlinks` dokumentiert (inkl. der Agent-IDs, die diese Datei brauchen).
 6. **Rollback**: Wenn die Installation abbricht (z.B. Symlink existiert bereits), werden alle bereits erstellten Symlinks zurückgerollt.
 
+### 4.1 Installationsprozess (Skill aktivieren)
+
+1. Skill (id, repo, name) wird in `config.json` unter `skills` eingetragen.
+2. Das gesamte Skill-Verzeichnis wird nach `~/.agent-control/skills/<skill-id>/` kopiert.
+3. Ordner-Symlink in `~/.kiro/skills/` als `agent-control_<skill-id>/`.
+4. Symlink wird in `config.json` unter `symlinks` dokumentiert.
+5. **Rollback**: Analog zu Agents.
+
 ---
 
 ## 5 Interaktiver Modus (Tools)
@@ -162,8 +208,9 @@ Reihenfolge der Einträge (jeweils mit Icon):
 1. 🔄 Update
 2. 📚 Manage Repositories
 3. 🤖 Agents
-4. 🩺 Doctor
-5. 🧹 Cleanup
+4. 📝 Skills
+5. 🩺 Doctor
+6. 🧹 Cleanup
 
 ### 5.2 Repository-Management (Tool)
 
@@ -214,7 +261,21 @@ Zentrales Tool für alle Agenten-Operationen. Ersetzt die bisherigen Einzeltools
 - Bietet Aktion **Install** oder **Uninstall** als Option (interaktive Liste).
 - Standardmäßig ist **Back** ausgewählt.
 
-### 5.4 Wartung (Tools)
+### 5.4 Skills-Management (Tool: Skills)
+
+Analog zum Agents-Tool. Zentrales Tool für alle Skill-Operationen.
+
+#### Übersicht
+
+- Zeigt **alle** Skills aus allen Repositories in einer einheitlichen Liste.
+- Installierte Skills sind **vorausgewählt** (Checkbox aktiv).
+- **Leertaste** togglet Aktivierung/Deaktivierung eines Skills.
+- **Enter** auf einem Skill öffnet die Detail-Ansicht.
+- Zusätzliche Menüpunkte am Ende der Liste:
+  - ✅ **Anwenden** – führt Install/Uninstall für alle Änderungen durch.
+  - ← **Abbrechen** – verwirft Änderungen, zurück zum Hauptmenü.
+
+### 5.5 Wartung (Tools)
 
 #### Doctor
 
