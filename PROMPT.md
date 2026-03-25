@@ -160,11 +160,10 @@ Wird gestartet mit `agent-control` (ohne Argumente) oder `agent-control interact
 Reihenfolge der Einträge (jeweils mit Icon):
 
 1. 🔄 Update
-2. 🔍 Browse Available
-3. 📦 Manage Installed Agents
-4. 📂 Manage Repositories
-5. 🩺 Doctor
-6. 🧹 Cleanup
+2. 📚 Manage Repositories
+3. 🤖 Agents
+4. 🩺 Doctor
+5. 🧹 Cleanup
 
 ### 5.2 Repository-Management (Tool)
 
@@ -189,31 +188,25 @@ Reihenfolge der Einträge (jeweils mit Icon):
 - Nutzt intern den `remove-repo`-Command.
 - Fehlermeldung, wenn noch Agents installiert sind.
 
-### 5.3 Agenten-Management (Tools)
+### 5.3 Agenten-Management (Tool: Agents)
 
-#### Verfügbare Agenten anzeigen (`list-available`)
+Zentrales Tool für alle Agenten-Operationen. Ersetzt die bisherigen Einzeltools (Browse, Manage, Install, Uninstall).
 
-- Listet alle bekannten Agents aus **allen** Repositories auf.
-- Installierte Agents sind direkt in der Liste erkennbar.
-- **Suche** und **Filter nach Repository** möglich.
-- Bei Auswahl eines Agenten → `info`-Ansicht (inkl. aller Funktionen).
-- Back-Funktion vorhanden.
+#### Übersicht
 
-#### Installierte Agenten anzeigen (`list`)
+- Zeigt **alle** Agents aus allen Repositories in einer einheitlichen Liste.
+- Installierte Agents sind **vorausgewählt** (Checkbox aktiv).
+- **Leertaste** togglet Aktivierung/Deaktivierung eines Agenten.
+- **Enter** auf einem Agenten öffnet die Detail-Ansicht (`info`-Tool).
+- Zusätzliche Menüpunkte am Ende der Liste:
+  - ✅ **Anwenden** – führt Install/Uninstall für alle Änderungen durch.
+  - ← **Abbrechen** – verwirft Änderungen, zurück zum Hauptmenü.
 
-- Listet alle aktiven Agenten auf.
-- Bei Auswahl → `info`-Tool.
+#### Ablauf "Anwenden"
 
-#### Agent installieren (`install`)
-
-- Interaktive Auswahlliste aller installierbaren Agents aus allen Repositories.
-- Installierte Agents sind direkt in der Liste erkennbar.
-- Fehler bei Versuch, einen bereits installierten Agent erneut zu installieren.
-
-#### Agent deinstallieren (`uninstall`)
-
-- Interaktive Liste der installierten Agents.
-- Auswahl → Agent wird deinstalliert.
+- Neu aktivierte Agents werden installiert.
+- Abgewählte (zuvor installierte) Agents werden deinstalliert.
+- Wenn keine Änderungen vorliegen, wird nichts ausgeführt.
 
 #### Agent-Info (`info`)
 
