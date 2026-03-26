@@ -1,6 +1,6 @@
 import { readConfig, writeConfig } from '../utils/index.js';
 import { loadRepoMeta } from '../analyzer.js';
-import { installSkillFiles, registerSymlinks, rollbackInstallation } from '../symlinks.js';
+import { installSkillFiles, registerSymlinks, rollbackSkillInstallation } from '../symlinks.js';
 
 export async function installSkill(repo: string, skillId: string): Promise<void> {
   const config = readConfig();
@@ -15,14 +15,16 @@ export async function installSkill(repo: string, skillId: string): Promise<void>
     throw new Error(`Skill ${skill.name} (${skill.id}) is already installed`);
   }
 
+  let symlinks: string[] = [];
   try {
-    const { symlinks } = installSkillFiles(skill);
+    const result = installSkillFiles(skill);
+    symlinks = result.symlinks;
     config.skills.push({ id: skill.id, repo, name: skill.name });
     writeConfig(config);
     registerSymlinks(skill.id, symlinks);
     console.log(`Installed skill ${skill.name} (${skill.id}) from ${repo}`);
   } catch (err) {
-    rollbackInstallation(skill.id, []);
+    rollbackSkillInstallation(skill.id, symlinks);
     throw err;
   }
 }

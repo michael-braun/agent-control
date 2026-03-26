@@ -45,7 +45,8 @@ function resolveSkillReference(
   }
 
   // Replace with installed path
-  return `skill://~/.kiro/skills/agent-control_${skill.id}/SKILL.md`;
+  const relativeInSkill = parts.slice(skillsIdx + 2).join('/') || 'SKILL.md';
+  return `skill://${join(KIRO_SKILLS_DIR, `agent-control_${skill.id}`, relativeInSkill)}`;
 }
 
 export function installAgentFiles(agent: Agent, repoName: string): { jsonPath: string; filesDir: string; symlinks: string[]; installedSkillIds: string[] } {
@@ -153,6 +154,17 @@ export function rollbackInstallation(agentId: string, symlinks: string[]): void 
   const agentDir = getAgentDir(agentId);
   if (existsSync(agentDir)) {
     rmSync(agentDir, { recursive: true, force: true });
+  }
+}
+
+export function rollbackSkillInstallation(skillId: string, symlinks: string[]): void {
+  for (const link of symlinks) {
+    removeSymlink(link);
+  }
+
+  const skillDir = getSkillDir(skillId);
+  if (existsSync(skillDir)) {
+    rmSync(skillDir, { recursive: true, force: true });
   }
 }
 

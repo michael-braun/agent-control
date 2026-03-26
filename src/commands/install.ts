@@ -1,6 +1,6 @@
 import { readConfig, writeConfig } from '../utils/index.js';
 import { loadRepoMeta } from '../analyzer.js';
-import { installAgentFiles, registerSymlinks, rollbackInstallation } from '../symlinks.js';
+import { installAgentFiles, registerSymlinks, rollbackInstallation, rollbackSkillInstallation } from '../symlinks.js';
 
 export async function installAgent(repo: string, agentId: string): Promise<void> {
   const config = readConfig();
@@ -20,8 +20,12 @@ export async function installAgent(repo: string, agentId: string): Promise<void>
     throw new Error(`Agent ${agent.name} (${agent.id}) is already installed`);
   }
   
+  let symlinks: string[] = [];
+  let installedSkillIds: string[] = [];
   try {
-    const { symlinks, installedSkillIds } = installAgentFiles(agent, repo);
+    const result = installAgentFiles(agent, repo);
+    symlinks = result.symlinks;
+    installedSkillIds = result.installedSkillIds;
     
     config.agents.push({ id: agent.id, repo, name: agent.name });
     writeConfig(config);
@@ -30,7 +34,10 @@ export async function installAgent(repo: string, agentId: string): Promise<void>
     
     console.log(`Installed ${agent.name} (${agent.id}) from ${repo}`);
   } catch (err) {
-    rollbackInstallation(agent.id, []);
+    for (const skillId of installedSkillIds) {
+      rollbackSkillInstallation(skillId, []);
+    }
+    rollbackInstallation(agent.id, symlinks);
     throw err;
   }
 }
