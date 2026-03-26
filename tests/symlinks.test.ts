@@ -29,16 +29,21 @@ describe('symlinks', () => {
     }));
 
     vi.doMock('../src/utils/index.js', () => ({
-      readConfig: vi.fn(() => ({ agents: [], symlinks: {} })),
+      readConfig: vi.fn(() => ({ agents: [], skills: [], symlinks: {} })),
       writeConfig: vi.fn(),
       createSymlink,
       removeSymlink: vi.fn(),
       getRepoPath: vi.fn(() => '/repo'),
-      getAgentDir: vi.fn(() => '/agents/abc')
+      getAgentDir: vi.fn(() => '/agents/abc'),
+      getRepoMetaPath: vi.fn(() => '/meta.json')
     }));
 
     vi.doMock('../src/constants.js', () => ({
       KIRO_AGENTS_DIR: '/kiro/agents'
+    }));
+
+    vi.doMock('../src/analyzer.js', () => ({
+      loadRepoMeta: vi.fn(() => ({ agents: [], skills: [] }))
     }));
 
     const { installAgentFiles } = await import('../src/symlinks.js');

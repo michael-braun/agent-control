@@ -1,30 +1,33 @@
 import { readConfig, writeConfig } from '../utils/index.js';
 import { loadRepoMeta } from '../analyzer.js';
-import { installAgentFiles, registerSymlinks, rollbackInstallation } from '../symlinks.js';
+import { installAgentFiles, registerSymlinks, rollbackInstallation, rollbackSkillInstallation } from '../symlinks.js';
 
 export async function installAgent(repo: string, agentId: string): Promise<void> {
   const config = readConfig();
   const meta = loadRepoMeta(repo);
   
   if (!meta) {
-    console.error(`Repository ${repo} not found`);
-    process.exit(1);
+    throw new Error(`Repository ${repo} not found`);
   }
   
   const agent = meta.agents.find(a => a.id === agentId);
   
   if (!agent) {
-    console.error(`Agent ${agentId} not found in ${repo}`);
-    process.exit(1);
+    throw new Error(`Agent ${agentId} not found in ${repo}`);
   }
   
   if (config.agents.find(a => a.id === agent.id && a.repo === repo)) {
-    console.error(`Error: Agent ${agent.name} (${agent.id}) is already installed`);
-    process.exit(1);
+    throw new Error(`Agent ${agent.name} (${agent.id}) is already installed`);
   }
   
+  let symlinks: string[] = [];
+  let installedSkillIds: string[] = [];
+  let installedSkillSymlinks: Record<string, string[]> = {};
   try {
-    const { symlinks } = installAgentFiles(agent, repo);
+    const result = installAgentFiles(agent, repo);
+    symlinks = result.symlinks;
+    installedSkillIds = result.installedSkillIds;
+    installedSkillSymlinks = result.installedSkillSymlinks;
     
     config.agents.push({ id: agent.id, repo, name: agent.name });
     writeConfig(config);
@@ -33,8 +36,10 @@ export async function installAgent(repo: string, agentId: string): Promise<void>
     
     console.log(`Installed ${agent.name} (${agent.id}) from ${repo}`);
   } catch (err) {
-    console.error(`Error: ${(err as Error).message}`);
-    rollbackInstallation(agent.id, []);
-    process.exit(1);
+    for (const skillId of installedSkillIds) {
+      rollbackSkillInstallation(skillId, installedSkillSymlinks[skillId] || []);
+    }
+    rollbackInstallation(agent.id, symlinks);
+    throw err;
   }
 }

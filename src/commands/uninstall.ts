@@ -7,7 +7,7 @@ export async function uninstallAgent(repo: string, agentId: string): Promise<voi
   const agentConfig = config.agents.find(a => a.id === agentId && a.repo === repo);
   
   if (!agentConfig) {
-    console.error(`Agent ${agentId} from ${repo} is not installed`);
+    console.error(`Error: Agent ${agentId} from ${repo} is not installed`);
     process.exit(1);
   }
   

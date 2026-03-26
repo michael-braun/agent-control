@@ -58,12 +58,9 @@ describe('commands install/uninstall', () => {
     }));
 
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    vi.spyOn(process, 'exit').mockImplementation((() => {
-      throw new Error('exit');
-    }) as any);
 
     const { installAgent } = await import('../../src/commands/install.js');
-    await expect(installAgent('repo', 'a1')).rejects.toThrow('exit');
+    await expect(installAgent('repo', 'a1')).rejects.toThrow('already installed');
   });
 
   it('uninstallAgent removes files and updates config', async () => {

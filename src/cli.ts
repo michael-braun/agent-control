@@ -12,7 +12,12 @@ import {
   listRepos,
   removeRepo,
   showAgentInfo,
-  interactive
+  interactive,
+  installSkill,
+  uninstallSkill,
+  listInstalledSkills,
+  listAvailableSkills,
+  showSkillInfo
 } from './commands/index.js';
 
 const program = new Command();
@@ -64,6 +69,31 @@ program
   .action(uninstallAgent);
 
 program
+  .command('install-skill <repo> <skill-id>')
+  .description('Install a skill')
+  .action(installSkill);
+
+program
+  .command('uninstall-skill <repo> <skill-id>')
+  .description('Uninstall a skill')
+  .action(uninstallSkill);
+
+program
+  .command('list-skills')
+  .description('List all installed skills')
+  .action(listInstalledSkills);
+
+program
+  .command('list-available-skills <repo>')
+  .description('List all available skills in a repository')
+  .action(listAvailableSkills);
+
+program
+  .command('skill-info <repo> <skill-id>')
+  .description('Show detailed information about a skill')
+  .action(showSkillInfo);
+
+program
   .command('cleanup')
   .description('Cleanup and recreate symlinks')
   .action(cleanup);
@@ -83,4 +113,7 @@ program
   .description('Start interactive mode')
   .action(interactive);
 
-program.parse();
+program.parseAsync().catch((err) => {
+  console.error(`Error: ${err.message}`);
+  process.exit(1);
+});

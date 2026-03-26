@@ -8,6 +8,7 @@ describe('cli bootstrap', () => {
 
   it('registers commands and parses argv', async () => {
     const parse = vi.fn();
+    const parseAsync = vi.fn(() => Promise.resolve());
     const action = vi.fn(() => commandApi);
     const description = vi.fn(() => commandApi);
     const command = vi.fn(() => commandApi);
@@ -18,7 +19,8 @@ describe('cli bootstrap', () => {
       version: vi.fn(() => commandApi),
       action,
       command,
-      parse
+      parse,
+      parseAsync
     };
 
     vi.doMock('commander', () => ({
@@ -37,12 +39,17 @@ describe('cli bootstrap', () => {
       listRepos: vi.fn(),
       removeRepo: vi.fn(),
       showAgentInfo: vi.fn(),
-      interactive: vi.fn()
+      interactive: vi.fn(),
+      installSkill: vi.fn(),
+      uninstallSkill: vi.fn(),
+      listInstalledSkills: vi.fn(),
+      listAvailableSkills: vi.fn(),
+      showSkillInfo: vi.fn()
     }));
 
     await import('../src/cli.js');
 
-    expect(parse).toHaveBeenCalled();
+    expect(parseAsync).toHaveBeenCalled();
     expect(command).toHaveBeenCalled();
   });
 });
