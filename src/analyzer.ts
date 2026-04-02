@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, basename } from 'path';
-import type { Agent, AgentJson, Skill, RepoMeta } from './types.js';
+import type { Agent, AgentJson, Skill, Steering, RepoMeta } from './types.js';
 import { hashPath, findJsonFiles, extractMarkdownLinks, getRepoMetaPath } from './utils/index.js';
 
 export function analyzeAgentJson(jsonPath: string, repoDir: string, repoName: string): Agent | null {
@@ -61,16 +61,18 @@ export function analyzeRepository(repoName: string, repoPath: string): void {
     .filter((a): a is Agent => a !== null);
   
   const skills = analyzeSkills(repoName, repoPath);
+  const steerings = analyzeSteerings(repoPath);
 
   const metaPath = getRepoMetaPath(repoName);
   const meta: RepoMeta = {
     agents,
     skills,
+    steerings,
     lastUpdated: new Date().toISOString()
   };
   writeFileSync(metaPath, JSON.stringify(meta, null, 2));
   
-  console.log(`Found ${agents.length} agents and ${skills.length} skills in ${repoName}`);
+  console.log(`Found ${agents.length} agents, ${skills.length} skills and ${steerings.length} steerings in ${repoName}`);
 }
 
 function collectFiles(dir: string): string[] {
@@ -123,6 +125,33 @@ export function analyzeSkills(repoName: string, repoPath: string): Skill[] {
   }
 
   return skills;
+}
+
+export function analyzeSteerings(repoPath: string): Steering[] {
+  const steeringDir = join(repoPath, 'steering');
+  if (!existsSync(steeringDir)) return [];
+
+  const jsonPath = join(steeringDir, 'steering.json');
+  if (!existsSync(jsonPath)) return [];
+
+  let meta: { name?: string; description?: string };
+  try {
+    meta = JSON.parse(readFileSync(jsonPath, 'utf8'));
+  } catch {
+    return [];
+  }
+  if (!meta.name || !meta.description) return [];
+
+  const mdFiles = readdirSync(steeringDir)
+    .filter(f => f.endsWith('.md'))
+    .map(f => join(steeringDir, f));
+
+  return [{
+    name: meta.name,
+    description: meta.description,
+    dir: steeringDir,
+    files: [jsonPath, ...mdFiles],
+  }];
 }
 
 export function loadRepoMeta(repoName: string): RepoMeta | null {

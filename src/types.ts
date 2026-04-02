@@ -31,9 +31,17 @@ export interface Skill {
   files: string[];
 }
 
+export interface Steering {
+  name: string;
+  description: string;
+  dir: string;
+  files: string[];
+}
+
 export interface RepoMeta {
   agents: Agent[];
   skills: Skill[];
+  steerings?: Steering[];
   lastUpdated?: string;
 }
 

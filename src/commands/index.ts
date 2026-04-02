@@ -15,3 +15,4 @@ export { uninstallSkill } from './uninstall-skill.js';
 export { listInstalledSkills } from './list-skills.js';
 export { listAvailableSkills } from './list-available-skills.js';
 export { showSkillInfo } from './skill-info.js';
+export { listAvailableSteerings } from './list-available-steerings.js';
