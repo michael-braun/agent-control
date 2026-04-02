@@ -44,7 +44,8 @@ describe('cli bootstrap', () => {
       uninstallSkill: vi.fn(),
       listInstalledSkills: vi.fn(),
       listAvailableSkills: vi.fn(),
-      showSkillInfo: vi.fn()
+      showSkillInfo: vi.fn(),
+      listAvailableSteerings: vi.fn()
     }));
 
     await import('../src/cli.js');

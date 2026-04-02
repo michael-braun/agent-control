@@ -17,7 +17,8 @@ import {
   uninstallSkill,
   listInstalledSkills,
   listAvailableSkills,
-  showSkillInfo
+  showSkillInfo,
+  listAvailableSteerings
 } from './commands/index.js';
 
 const program = new Command();
@@ -92,6 +93,11 @@ program
   .command('skill-info <repo> <skill-id>')
   .description('Show detailed information about a skill')
   .action(showSkillInfo);
+
+program
+  .command('list-available-steerings <repo>')
+  .description('List all available steerings in a repository')
+  .action(listAvailableSteerings);
 
 program
   .command('cleanup')

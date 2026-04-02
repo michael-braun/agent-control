@@ -49,7 +49,7 @@ describe('analyzer', () => {
     analyzeRepository('repo', '/repo');
 
     expect(writeFileSync).toHaveBeenCalledWith('/repo/meta.json', expect.stringContaining('agent-hash'));
-    expect(log).toHaveBeenCalledWith('Found 1 agents and 0 skills in repo');
+    expect(log).toHaveBeenCalledWith('Found 1 agents, 0 skills and 1 steerings in repo');
   });
 });
 
