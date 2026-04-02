@@ -194,7 +194,7 @@ Wird ausgeführt bei: `add-repo`, `update`.
 2. Es muss eine `steering.json` mit `name` und `description` enthalten sein.
 3. Alle `.md`-Dateien im `steering/`-Verzeichnis werden als Steering-Dateien erfasst.
 4. Ergebnisse werden in `~/.agent-control/repos/<name>.meta.json` unter dem Property `steerings` gespeichert.
-5. Steering-Dateien können in Agent-JSONs unter `resources` per `file://`-Relativpfad referenziert werden (z.B. `file://../../steering/structure.md`). Die bestehende `file://`-Mechanik (Analyse, Kopieren, Pfad-Rewriting) greift automatisch.
+5. Steering-Dateien können in Agent-JSONs unter `resources` per `file://`-Pfad referenziert werden (z.B. `file://../../steering/structure.md`). Alle `file://`-Pfade werden relativ zum Verzeichnis der Agent-JSON aufgelöst. Die bestehende `file://`-Mechanik (Analyse, Kopieren, Pfad-Rewriting) greift automatisch.
 
 ---
 

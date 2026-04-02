@@ -41,7 +41,7 @@ export interface Steering {
 export interface RepoMeta {
   agents: Agent[];
   skills: Skill[];
-  steerings: Steering[];
+  steerings?: Steering[];
   lastUpdated?: string;
 }
 
